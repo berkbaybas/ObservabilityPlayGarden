@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ObservabilityPlayGarden.ConsoleApp": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

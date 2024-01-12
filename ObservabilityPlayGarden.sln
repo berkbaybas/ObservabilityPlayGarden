@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObservabilityPlayGarden.ConsoleApp", "ObservabilityPlayGarden.ConsoleApp\ObservabilityPlayGarden.ConsoleApp.csproj", "{0C3430B5-090C-4DEC-B519-D450852CCDFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObservabilityPlayGarden.ConsoleApp", "ObservabilityPlayGarden.ConsoleApp\ObservabilityPlayGarden.ConsoleApp.csproj", "{0C3430B5-090C-4DEC-B519-D450852CCDFA}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{3462B717-39DF-42E3-AD32-2175B7E0607E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{0C3430B5-090C-4DEC-B519-D450852CCDFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C3430B5-090C-4DEC-B519-D450852CCDFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C3430B5-090C-4DEC-B519-D450852CCDFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3462B717-39DF-42E3-AD32-2175B7E0607E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3462B717-39DF-42E3-AD32-2175B7E0607E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3462B717-39DF-42E3-AD32-2175B7E0607E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3462B717-39DF-42E3-AD32-2175B7E0607E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

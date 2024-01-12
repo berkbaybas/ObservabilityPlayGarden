@@ -5,7 +5,7 @@ using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-var traceProvider = Sdk.CreateTracerProviderBuilder()
+using var traceProvider = Sdk.CreateTracerProviderBuilder()
                         .AddSource(StringConsts.ActivitySourceName)
                         .ConfigureResource(resource =>
                                 resource.AddService(
@@ -15,6 +15,7 @@ var traceProvider = Sdk.CreateTracerProviderBuilder()
                                         new KeyValuePair<string, object>("host.machineName", Environment.MachineName)
                                     }))
                          .AddConsoleExporter()
+                         .AddOtlpExporter()
                          .Build();
 
 

@@ -22,17 +22,15 @@ namespace ObservabilityPlayGarden.ConsoleApp
                 activity.AddTag("request.method", "get");
 
                 Work1();
+
                 var client = new HttpClient();
                 var response = await client.GetStringAsync("http://google.com");
-
                 activity.AddTag("request.responselenght", response.Length);
 
                 Console.WriteLine("Work2 Completed");
 
-
                 await Work3("Hello World");
                 Console.WriteLine("Work3 Completed");
-
             }
             catch (Exception ex)
             {
@@ -43,10 +41,10 @@ namespace ObservabilityPlayGarden.ConsoleApp
 
         public static async Task<int> Work3(string txt)
         {
-            using var activity = ActivitySourceProvider.Source.StartActivity("Work1 Activity Write to File", kind: ActivityKind.Client);
+            using var activity = ActivitySourceProvider.Source.StartActivity("Work3 Activity Write to File", kind: ActivityKind.Client);
 
             await File.WriteAllTextAsync("myFile.txt", txt);
-
+            
             return (await File.ReadAllTextAsync("myFile.txt")).Length;
         }
     }
