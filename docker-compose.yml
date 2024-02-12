@@ -3,8 +3,14 @@ version: '3.4'
 services:
   jeager:
     image: jaegertracing/all-in-one:1.53
-    container_name: "jeager_container"
-    ports:
-      - 4317:4317 #grpc
-      - 4318:4318 #http
-      - 16686:16686 #ui
+  elasticsearch:
+    image: elasticsearch:8.11.3
+  kibana: 
+    image: kibana:8.11.3
+  #logstash:
+  #  image: logstash:8.12.0
+  #  ports:
+  #    - "5044:5044"
+  #  volumes:
+  #    - /path/to/logstash/config:/usr/share/logstash/config
+

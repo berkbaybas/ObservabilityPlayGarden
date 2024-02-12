@@ -1,6 +1,4 @@
-﻿
-
-using ObservabilityPlayGarden.ConsoleApp;
+﻿using ObservabilityPlayGarden.ConsoleApp;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -18,6 +16,11 @@ using var traceProvider = Sdk.CreateTracerProviderBuilder()
                          .AddOtlpExporter()
                          .Build();
 
+using var fileTraceProvider = Sdk.CreateTracerProviderBuilder()
+                                .AddSource(StringConsts.ActivitySourceFileName)
+                                .Build();
+
 
 //ServiceHelper.Work1();
 await ServiceHelper.Work2();
+
