@@ -11,7 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddOpenTelemetryExtension(builder.Configuration);
+builder.Services.AddOpenTelemetryExt(builder.Configuration);
 
 builder.Services.AddScoped<OrderService>(); // request response kadar kullanayým sonra nesne dispose olsun. business logic scoped olmalý çünkü dbContext scope. (transaction saðlama amacýyla)
 
@@ -24,7 +24,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
+
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

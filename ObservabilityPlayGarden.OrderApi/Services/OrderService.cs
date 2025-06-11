@@ -13,6 +13,12 @@ namespace ObservabilityPlayGarden.OrderApi.Services
             activity?.AddEvent(new("Sipariş süreci başladı."));
             activity.AddTag("order user id", requestDTO.UserId);
             activity?.AddEvent(new("Sipariş süreci tamamlandı."));
+
+
+
+            MetricProvider.OrderCreatedEventCounter.Add(1,
+                    new KeyValuePair<string, object?>("queue-name", "event.created.queue"));
+            
             return Task.CompletedTask;
         }
     }

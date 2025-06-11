@@ -22,3 +22,6 @@ services:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
       - elasticsearch
+  prometheus:
+    ports:
+      - 9090:9090

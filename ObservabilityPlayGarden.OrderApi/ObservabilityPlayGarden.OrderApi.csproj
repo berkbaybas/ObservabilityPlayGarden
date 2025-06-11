@@ -11,11 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\OpenTelemetry.Shared\OpenTelemetry.Shared.csproj" />
+    <Folder Include="OpenTelemetry\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="OpenTelemetry\" />
+    <ProjectReference Include="..\ObservabilityPlayGarden.OpenTelemetry.Shared\ObservabilityPlayGarden.OpenTelemetry.Shared.csproj" />
   </ItemGroup>
 
 </Project>
