@@ -1,5 +1,4 @@
-﻿using MassTransit.Logging;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -10,107 +9,50 @@ namespace ObservabilityPlayGarden.OpenTelemetry.Shared;
 public static class OpenTelemetryExtensions
 {
     public static void AddOpenTelemetryExt(this IServiceCollection services, IConfiguration configuration)
-
     {
         services.Configure<OpenTelemetryConstants>(configuration.GetSection("OpenTelemetry"));
-        var openTelemetryConstants = (configuration.GetSection("OpenTelemetry").Get<OpenTelemetryConstants>())!;
+        var openTelemetryConstants = configuration.GetSection("OpenTelemetry").Get<OpenTelemetryConstants>();
+        if (openTelemetryConstants is null)
+        {
+            throw new InvalidOperationException("OpenTelemetry configuration is missing or invalid.");
+        }
 
         ActivitySourceProvider.Source = new System.Diagnostics.ActivitySource(openTelemetryConstants.ActivitySourceName);
-
-        services.AddOpenTelemetry().WithTracing(options =>
+        
+        services.AddOpenTelemetry().WithTracing(configure =>
         {
-            options.AddSource(openTelemetryConstants.ActivitySourceName)
-            .AddSource(DiagnosticHeaders.DefaultListenerName)
+            configure.AddSource(openTelemetryConstants.ActivitySourceName)
             .ConfigureResource(resource =>
             {
                 resource.AddService(openTelemetryConstants.ServiceName, serviceVersion: openTelemetryConstants.ServiceVersion);
             });
-            options.AddAspNetCoreInstrumentation(aspnetcoreOptions =>
+            configure.AddAspNetCoreInstrumentation(aspnetcoreOptions =>
             {
-
-
-                aspnetcoreOptions.Filter = (context) =>
+                aspnetcoreOptions.Filter = context =>
                 {
-
-                    if (!string.IsNullOrEmpty(context.Request.Path.Value))
-                    {
-                        return context.Request.Path.Value.Contains("api", StringComparison.InvariantCulture);
-                    }
-                    return false;
-
+                    var path = context.Request.Path.Value;
+                    return !string.IsNullOrEmpty(path) &&
+                           path.Contains("api", StringComparison.OrdinalIgnoreCase);
                 };
 
                 // Serilog üzerinden elasticsearch db'ye hatalar gönderildiği için kapatıldı.
                 //aspnetcoreOptions.RecordException = true;
-
-                //aspnetcoreOptions.EnrichWithException = (activity, exception) =>
-                //{
-
-                //    // Bilerek boş bırakıldı. Örnek göstermek için
-                //};
-
             });
 
-            options.AddEntityFrameworkCoreInstrumentation(efcoreOptions =>
-            {
-                efcoreOptions.SetDbStatementForText = true;
-                efcoreOptions.SetDbStatementForStoredProcedure = true;
-                efcoreOptions.EnrichWithIDbCommand = (activity, dbCommand) =>
-                {
-                    // Bilerek boş bırakıldı. Örnek göstermek için
-
-                };
-            });
-
-            options.AddHttpClientInstrumentation(httpOptions =>
-            {
-                httpOptions.FilterHttpRequestMessage = (request) =>
-                {
-                    return !request.RequestUri.AbsoluteUri.Contains("9200", StringComparison.InvariantCulture);
-                };
-
-                httpOptions.EnrichWithHttpRequestMessage = async (activity, request) =>
-                {
-                    var requestContent = "empty";
-
-                    if (request.Content != null)
-                    {
-                        requestContent = await request.Content.ReadAsStringAsync();
-                    }
-
-
-                    activity.SetTag("http.request.body", requestContent);
-                };
-
-                httpOptions.EnrichWithHttpResponseMessage = async (activity, response) =>
-                {
-
-                    if (response.Content != null)
-                    {
-                        activity.SetTag("http.response.body", await response.Content.ReadAsStringAsync());
-                    }
-
-                };
-
-            });
-
-            options.AddRedisInstrumentation(redisOptions =>
-            {
-                redisOptions.SetVerboseDatabaseStatements = true;
-            });
-
-            options.AddConsoleExporter();
-            options.AddOtlpExporter(); // Jaeger
+            configure.AddConsoleExporter();
+            configure.AddOtlpExporter(); // Jaeger
         });
 
-        services.AddOpenTelemetry().WithMetrics(options =>
+        services.AddOpenTelemetry().WithMetrics(configure =>
         {
-            options.AddMeter("metric.meter.api");
-            options.ConfigureResource(resource =>
+            configure.AddMeter("metric.meter.api");
+            configure.ConfigureResource(resource =>
             {
-                resource.AddService("Metric.API", serviceVersion: "1.0.0");
+                resource.AddService(openTelemetryConstants.ServiceName, serviceVersion: openTelemetryConstants.ServiceVersion);
             });
-            options.AddPrometheusExporter();
+
+            configure.AddConsoleExporter();
+            configure.AddPrometheusExporter();
         });
     }
 }

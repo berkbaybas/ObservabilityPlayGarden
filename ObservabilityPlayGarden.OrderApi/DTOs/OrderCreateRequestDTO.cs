@@ -2,8 +2,9 @@
 {
     public record OrderCreateRequestDTO
     {
-        public int UserId { get; set; }
+        public long UserId { get; set; }
         public List<OrderItemDto> Items { get; set; } = null!;
+        public decimal TotalPrice => Items?.Sum(i => i.Count * i.UnitPrice) ?? 0;
     }
 
     public class OrderItemDto

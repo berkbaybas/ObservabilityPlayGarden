@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using ObservabilityPlayGarden.OpenTelemetry.Shared;
 using ObservabilityPlayGarden.OrderApi.DTOs;
-using ObservabilityPlayGarden.OrderApi.Services;
 
 namespace ObservabilityPlayGarden.OrderApi.Controllers
 {
@@ -9,25 +9,76 @@ namespace ObservabilityPlayGarden.OrderApi.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly OrderService orderService;
-        public OrderController(OrderService orderService)
+        private readonly ILogger<OrderController> _logger;
+
+        public OrderController(ILogger<OrderController> logger)
         {
-            this.orderService = orderService;
+            _logger = logger;
         }
 
         [HttpPost]
         public IActionResult Create(OrderCreateRequestDTO dto)
         {
-            #region Exception örneği için
-            // Exception örneği için
-            //var a = 10;
-            //var b = 0;
-            //var c = a / b;
-            #endregion
+            using var activity = ActivitySourceProvider.Source.StartActivity("Order.Create")!;
 
-            orderService.CreateAsync(dto);
+            activity.SetTag("user.id", dto.UserId);
+            activity.SetTag("order.totalPrice", dto.TotalPrice);
+            activity.AddEvent(new("Order creation started"));
 
-            return Ok();
+            try
+            {
+                if (dto.TotalPrice <= 0)
+                    throw new ArgumentException("Total price must be greater than zero.");
+
+                MetricProvider.OrderCreatedEventCounter.Add(1,
+                    new KeyValuePair<string, object?>("queue-name", "event.created.queue"));
+
+                _logger.LogInformation("Order created for user {UserId} with total {TotalPrice}",
+                    dto.UserId, dto.TotalPrice);
+
+                activity?.AddEvent(new("Order creation completed"));
+                return Ok(new { Message = "Order created successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating order for user {UserId}", dto.UserId);
+                activity.SetStatus(ActivityStatusCode.Error, ex.Message);
+                return StatusCode(500, "Unexpected error");
+            }
+        }
+
+        [HttpGet("list")]
+        public IActionResult GetAllOrderHistory()
+        {
+            _logger.LogInformation("Fetching orders history");
+
+            var orders = new List<object>
+            {
+                new { OrderId = 1, Price = 150, CreatedAt = DateTime.UtcNow.AddDays(-2) },
+                new { OrderId = 2, Price = 200, CreatedAt = DateTime.UtcNow.AddDays(-1) },
+                new { OrderId = 3, Price = 1200, CreatedAt = DateTime.UtcNow.AddDays(-3) }
+            };
+            
+            MetricProvider.OrderHistoryRequestCounter.Add(1);
+
+            return Ok(orders);
+        }
+
+        [HttpDelete("{orderId}")]
+        public IActionResult CancelOrder(long orderId)
+        {            
+            // Trace
+            using var activity = ActivitySourceProvider.Source.StartActivity("Order.Cancel");
+
+            activity?.SetTag("order.id", orderId);
+            _logger.LogWarning("Order cancellation requested: {OrderId}", orderId);
+            activity?.AddEvent(new("Cancellation initiated"));
+
+            // Metric
+            MetricProvider.OrderCancelledCounter.Add(1, new KeyValuePair<string, object?>("order-id", orderId.ToString()));
+            _logger.LogInformation("Order cancelled: {OrderId}", orderId);
+
+            return Ok(new { Message = "Order cancelled" });
         }
     }
 }

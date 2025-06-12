@@ -7,11 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <Compile Remove="OpenTelemetry\**" />
+    <Content Remove="OpenTelemetry\**" />
+    <EmbeddedResource Remove="OpenTelemetry\**" />
+    <None Remove="OpenTelemetry\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="OpenTelemetry\" />
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
